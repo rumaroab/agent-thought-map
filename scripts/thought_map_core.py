@@ -70,6 +70,10 @@ def events_path(data_dir: Path, trace_id: str) -> Path:
     return trace_dir(data_dir, trace_id) / "events.jsonl"
 
 
+def cot_events_path(data_dir: Path, trace_id: str) -> Path:
+    return trace_dir(data_dir, trace_id) / "cot-events.jsonl"
+
+
 def active_path(data_dir: Path, trace_id: str) -> Path:
     return trace_dir(data_dir, trace_id) / "active.json"
 
@@ -117,6 +121,15 @@ def append_event(data_dir: Path, event: dict[str, Any]) -> dict[str, Any]:
     return normalized
 
 
+def append_cot_event(data_dir: Path, event: dict[str, Any]) -> dict[str, Any]:
+    normalized = normalize_event(event, default_trace_id=event.get("trace_id"))
+    path = cot_events_path(data_dir, normalized["trace_id"])
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("a", encoding="utf-8") as handle:
+        handle.write(json.dumps(normalized, sort_keys=True, separators=(",", ":")) + "\n")
+    return normalized
+
+
 def import_events(data_dir: Path, trace_id: str, events: list[dict[str, Any]]) -> int:
     count = 0
     for event in events:
@@ -145,6 +158,10 @@ def latest_trace_id(data_dir: Path) -> str | None:
 
 def update_latest(data_dir: Path, trace_id: str, outputs: dict[str, str] | None = None) -> None:
     current = read_json(latest_path(data_dir)) or {}
+    same_trace = current.get("trace_id") == trace_id
+    current_outputs = current.get("outputs") if same_trace else {}
+    if not isinstance(current_outputs, dict):
+        current_outputs = {}
     payload = {
         **current,
         "plugin": PLUGIN_NAME,
@@ -153,7 +170,9 @@ def update_latest(data_dir: Path, trace_id: str, outputs: dict[str, str] | None 
         "updated_at": utc_now(),
     }
     if outputs:
-        payload["outputs"] = outputs
+        payload["outputs"] = {**current_outputs, **outputs}
+    elif not same_trace:
+        payload.pop("outputs", None)
     write_json(latest_path(data_dir), payload)
 
 
@@ -256,17 +275,56 @@ def make_event(
 
 
 def render_trace(data_dir: Path, trace_id: str, max_nodes: int = DEFAULT_MAX_NODES) -> dict[str, str]:
-    events = read_jsonl(events_path(data_dir, trace_id))
+    return render_event_trace(
+        data_dir=data_dir,
+        trace_id=trace_id,
+        source_path=events_path(data_dir, trace_id),
+        max_nodes=max_nodes,
+        markdown_title="Agent Thought Map",
+        mmd_name="latest.mmd",
+        md_name="latest.md",
+        trace_name="trace.json",
+        output_keys=("latest_mmd", "latest_md", "trace_json"),
+    )
+
+
+def render_cot_trace(data_dir: Path, trace_id: str, max_nodes: int = DEFAULT_MAX_NODES) -> dict[str, str]:
+    return render_event_trace(
+        data_dir=data_dir,
+        trace_id=trace_id,
+        source_path=cot_events_path(data_dir, trace_id),
+        max_nodes=max_nodes,
+        markdown_title="Agent Thought Map CoT",
+        mmd_name="latest-cot.mmd",
+        md_name="latest-cot.md",
+        trace_name="trace-cot.json",
+        output_keys=("latest_cot_mmd", "latest_cot_md", "trace_cot_json"),
+    )
+
+
+def render_event_trace(
+    *,
+    data_dir: Path,
+    trace_id: str,
+    source_path: Path,
+    max_nodes: int,
+    markdown_title: str,
+    mmd_name: str,
+    md_name: str,
+    trace_name: str,
+    output_keys: tuple[str, str, str],
+) -> dict[str, str]:
+    events = read_jsonl(source_path)
     nodes, edges = reduce_events(events, max_nodes=max_nodes)
     out_dir = trace_dir(data_dir, trace_id)
     out_dir.mkdir(parents=True, exist_ok=True)
 
     mermaid = build_mermaid(nodes, edges)
-    mmd_path = out_dir / "latest.mmd"
-    md_path = out_dir / "latest.md"
-    trace_path = out_dir / "trace.json"
+    mmd_path = out_dir / mmd_name
+    md_path = out_dir / md_name
+    trace_path = out_dir / trace_name
     mmd_path.write_text(mermaid + "\n", encoding="utf-8")
-    md_path.write_text(build_markdown(trace_id, nodes, edges, mermaid), encoding="utf-8")
+    md_path.write_text(build_markdown(trace_id, nodes, edges, mermaid, title=markdown_title), encoding="utf-8")
     write_json(
         trace_path,
         {
@@ -277,7 +335,11 @@ def render_trace(data_dir: Path, trace_id: str, max_nodes: int = DEFAULT_MAX_NOD
         },
     )
 
-    outputs = {"latest_mmd": str(mmd_path), "latest_md": str(md_path), "trace_json": str(trace_path)}
+    outputs = {
+        output_keys[0]: str(mmd_path),
+        output_keys[1]: str(md_path),
+        output_keys[2]: str(trace_path),
+    }
     update_latest(data_dir, trace_id, outputs=outputs)
     return outputs
 
@@ -430,9 +492,15 @@ def build_mermaid(nodes: list[dict[str, Any]], edges: list[dict[str, str]]) -> s
     return "\n".join(lines)
 
 
-def build_markdown(trace_id: str, nodes: list[dict[str, Any]], edges: list[dict[str, str]], mermaid: str) -> str:
+def build_markdown(
+    trace_id: str,
+    nodes: list[dict[str, Any]],
+    edges: list[dict[str, str]],
+    mermaid: str,
+    title: str = "Agent Thought Map",
+) -> str:
     rows = [
-        "# Agent Thought Map",
+        f"# {title}",
         "",
         f"Trace: `{redact_text(trace_id, limit=120)}`",
         "",

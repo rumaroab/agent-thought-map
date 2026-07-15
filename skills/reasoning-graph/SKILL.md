@@ -64,6 +64,19 @@ If `PLUGIN_ROOT` is not available in a shell command, resolve the absolute plugi
 
 5. Tell the user where `latest.md`, `latest.mmd`, and `trace.json` were written.
 
+## Optional Rationale Graph
+
+For internal workflow review, the CLI can also write a separate `latest-cot.md` graph from explicit rationale checkpoints. This is not hidden chain-of-thought or transcript parsing; use it only for high-level rationale summaries that are safe to store.
+
+Example:
+
+```bash
+python3 "$PLUGIN_ROOT/scripts/agent_thought_map.py" checkpoint-cot --kind decision --title "Chose adapter path" --summary "Adapters already normalize runtime events, so the change belongs in the renderer and CLI."
+python3 "$PLUGIN_ROOT/scripts/agent_thought_map.py" render-cot
+```
+
+When using this optional graph, tell the user where `latest-cot.md`, `latest-cot.mmd`, and `trace-cot.json` were written.
+
 ## Checkpoint Quality
 
 - Use short titles.

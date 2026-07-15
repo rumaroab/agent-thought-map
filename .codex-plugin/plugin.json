@@ -1,15 +1,15 @@
 {
   "name": "agent-thought-map",
   "version": "0.1.0",
-  "description": "Create compact Mermaid graphs of an agent's observable working process.",
+  "description": "Create compact Mermaid graphs of an agent's observable work and explicit rationale checkpoints.",
   "author": {
     "name": "<YOUR NAME>"
   },
   "skills": "./skills/",
   "interface": {
     "displayName": "Agent Thought Map",
-    "shortDescription": "Render observable agent work as a Mermaid graph.",
-    "longDescription": "Agent Thought Map renders compact Mermaid flowcharts from generic observable events. Thin adapters for Codex, Claude Code, and OpenCode normalize native events into the same schema, and the core does not expose hidden chain-of-thought.",
+    "shortDescription": "Render agent work and rationale as Mermaid graphs.",
+    "longDescription": "Agent Thought Map renders compact Mermaid flowcharts from generic observable events, plus an optional separate rationale graph from explicit checkpoints. Thin adapters for Codex, Claude Code, and OpenCode normalize native events into the same schema, and the core does not expose hidden chain-of-thought.",
     "developerName": "<YOUR NAME>",
     "category": "Productivity",
     "capabilities": [
