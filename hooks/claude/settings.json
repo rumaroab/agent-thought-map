@@ -1,0 +1,107 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$AGENT_THOUGHT_MAP_ROOT/scripts/claude_adapter.py\" collect",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$AGENT_THOUGHT_MAP_ROOT/scripts/claude_adapter.py\" collect",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$AGENT_THOUGHT_MAP_ROOT/scripts/claude_adapter.py\" collect",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$AGENT_THOUGHT_MAP_ROOT/scripts/claude_adapter.py\" collect",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PostToolUseFailure": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$AGENT_THOUGHT_MAP_ROOT/scripts/claude_adapter.py\" collect",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PermissionRequest": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$AGENT_THOUGHT_MAP_ROOT/scripts/claude_adapter.py\" collect",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "SubagentStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$AGENT_THOUGHT_MAP_ROOT/scripts/claude_adapter.py\" collect",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$AGENT_THOUGHT_MAP_ROOT/scripts/claude_adapter.py\" collect",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$AGENT_THOUGHT_MAP_ROOT/scripts/claude_adapter.py\" collect",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}
