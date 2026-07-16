@@ -3,14 +3,14 @@
   "version": "0.1.0",
   "description": "Create compact Mermaid graphs of an agent's observable working process.",
   "author": {
-    "name": "<YOUR NAME>"
+    "name": "Rui Abreu"
   },
   "skills": "./skills/",
   "interface": {
     "displayName": "Agent Thought Map",
     "shortDescription": "Render observable agent work as a Mermaid graph.",
     "longDescription": "Agent Thought Map renders compact Mermaid flowcharts from generic observable events. Thin adapters for Codex, Claude Code, and OpenCode normalize native events into the same schema, and the core does not expose hidden chain-of-thought.",
-    "developerName": "<YOUR NAME>",
+    "developerName": "Rui Abreu",
     "category": "Productivity",
     "capabilities": [
       "Read",
